@@ -129,6 +129,10 @@ Rooms also carry a device list (with each device's live mode and remaining time)
 per-task time, an ambient soundscape (brown noise / rain / room hum, synthesised — no audio files),
 a daily goal, streaks, goal-days, CSV export of the whole history, and a PWA manifest so it installs.
 
+## License
+
+MIT — see [LICENSE](LICENSE). Take it, fork it, ship it.
+
 ## Known limits
 
 - Presence is "seen in the last 25 seconds", not a socket handshake; a device that sleeps shows as away.
