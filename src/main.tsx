@@ -1,5 +1,9 @@
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+// Self-hosted variable fonts (SIL OFL) — bundled, never fetched from a CDN,
+// so the offline service worker can cache them like any other asset.
+import '@fontsource-variable/inter/wght.css';
+import '@fontsource-variable/space-grotesk/wght.css';
 import App from './App';
 import './styles.css';
 

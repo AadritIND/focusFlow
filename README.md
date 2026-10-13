@@ -18,6 +18,17 @@ mode-tinted background, same pill controls and system type. What changed is ever
   yesterday / the day before / streaks / an 18-week heatmap / per-task time are all derived from it.
 - **A world clock** with a day/night read, and a room timezone that decides when "today" ends.
 
+## Typography
+
+The interface is set in [Inter](https://rsms.me/inter/) and the display voice — headings, the
+countdown, the headline numbers — in [Space Grotesk](https://github.com/floriankarsten/space-grotesk).
+Both are variable fonts, self-hosted through `@fontsource-variable/*` (SIL OFL 1.1) rather than pulled
+from a font CDN, so the app works offline and the service worker can cache them like any other asset.
+Fonts are loaded per unicode subset, so a browser downloads the latin file it needs and nothing else.
+
+The countdown renders with tabular figures (verified: `11:11`, `00:00`, `08:08` and `99:59` all measure
+identically), so digits never shift sideways as the clock ticks.
+
 ## Quick start
 
 ```bash
