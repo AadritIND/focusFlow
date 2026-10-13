@@ -1,0 +1,33 @@
+{
+  "name": "focusflow",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "FocusFlow — a shared study timer with permanent rooms, live multi-device sync and long-range history.",
+  "scripts": {
+    "dev": "vite",
+    "dev:api": "wrangler dev --port 8787 --local",
+    "build": "npm run check && vite build && node scripts/build-worker.mjs",
+    "build:client": "vite build",
+    "build:worker": "node scripts/build-worker.mjs",
+    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.worker.json --noEmit",
+    "db:init": "wrangler d1 execute focusflow --local --file=worker/schema.sql",
+    "db:init:remote": "wrangler d1 execute focusflow --remote --file=worker/schema.sql",
+    "test:api": "node scripts/test-api.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250726.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "esbuild": "^0.24.2",
+    "typescript": "^5.7.3",
+    "vite": "^5.4.14",
+    "wrangler": "^3.101.0"
+  }
+}

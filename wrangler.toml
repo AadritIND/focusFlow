@@ -1,0 +1,18 @@
+name = "focusflow"
+main = "worker/index.ts"
+compatibility_date = "2025-07-01"
+
+# Local dev only. In production the Sites manifest supplies the entrypoint,
+# the assets directory and the D1 binding.
+[assets]
+directory = "./dist/client"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "focusflow"
+database_id = "local-focusflow"
+
+[vars]
+APP_NAME = "FocusFlow"

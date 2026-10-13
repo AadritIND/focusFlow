@@ -1,0 +1,26 @@
+{
+  "name": "FocusFlow — a shared study timer",
+  "short_name": "FocusFlow",
+  "description": "Rooms with permanent codes, a shared countdown that every device agrees on, and history that keeps every session.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f1ea",
+  "theme_color": "#f3f1ea",
+  "categories": ["productivity", "education"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

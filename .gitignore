@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# local dev state (wrangler/miniflare D1, server logs)
+.wrangler/
+.dev/
+
+# tooling metadata
+.freebuff/
+
+# logs
+*.log
+npm-debug.log*
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# env files (this project needs none, but never commit them by accident)
+.env
+.env.*
+!.env.example

@@ -1,0 +1,15 @@
+# Keep the repository in LF so Windows and macOS/Linux checkouts stay identical.
+* text=auto eol=lf
+
+# Binary assets are never touched.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Windows-only scripts keep CRLF if they ever appear.
+*.bat text eol=crlf
+*.cmd text eol=crlf

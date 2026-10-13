@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="FocusFlow">
+  <rect width="512" height="512" rx="112" fill="#f3f1ea"/>
+  <g transform="translate(256 256)" fill="none" stroke="#b5430f" stroke-linecap="round">
+    <circle r="132" stroke="#1c1b18" stroke-opacity="0.16" stroke-width="26"/>
+    <path d="M0 -132a132 132 0 0 1 114.3 65.9" stroke-width="30"/>
+    <path d="M-114.3 65.9A132 132 0 0 0 0 132" stroke-width="30" stroke-opacity="0.5"/>
+  </g>
+  <g transform="translate(256 256)">
+    <path d="M0 0V-84" stroke="#1c1b18" stroke-width="22" stroke-linecap="round"/>
+    <circle r="24" fill="#1c1b18"/>
+  </g>
+</svg>
