@@ -59,14 +59,17 @@ export function StatsPanel({ onOpenHistory }: { onOpenHistory: () => void }) {
               <div className="bar-fill" style={{ width: `${stats.goal.pct}%` }} />
             </div>
           </div>
-          <div className="cell">
+          <div className="cell room-code-cell">
             <div className="k">Room code</div>
-            <div className="v num" style={{ letterSpacing: '0.12em' }}>
+            <div className="v num room-code-value">
               {room.code}
             </div>
-            <div className="s">
-              {room.onlineIds.size} online · {room.members.length} {room.members.length === 1 ? 'device' : 'devices'}
-              {since ? ` · since ${since}` : ''}
+            <div className="s room-code-meta">
+              <span>
+                {room.onlineIds.size} online · {room.members.length}{' '}
+                {room.members.length === 1 ? 'device' : 'devices'}
+              </span>
+              {since ? <span>Since {since}</span> : null}
             </div>
           </div>
         </div>
