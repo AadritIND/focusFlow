@@ -65,6 +65,7 @@ export interface RoomValue {
   setRoomTz: (tz: string) => Promise<void>;
   renameDevice: (name: string) => void;
   leaveRoom: () => Promise<void>;
+  destroyRoom: () => Promise<boolean>;
   refresh: (force?: boolean) => void;
 }
 
@@ -873,6 +874,22 @@ export function RoomProvider({ code, children }: { code: string; children: React
     }
   }, [upper]);
 
+  /* Burn the room on the server, then forget it locally. Every other device is
+   * kicked out by its own sync loop; this device navigates home itself. */
+  const destroyRoom = useCallback(async () => {
+    const current = memberRef.current;
+    if (!current) return false;
+    try {
+      await api.destroyRoom(upper, { deviceId: deviceRef.current.id, token: current.token });
+    } catch {
+      return false;
+    }
+    fatalRef.current = 'room_destroyed';
+    forgetRoom(upper);
+    setError('room_destroyed');
+    return true;
+  }, [upper]);
+
   const refresh = useCallback((force = true) => void syncOnce(force), [syncOnce]);
 
   /* ---------------------------------------------------------------- */
@@ -923,6 +940,7 @@ export function RoomProvider({ code, children }: { code: string; children: React
     setRoomTz,
     renameDevice,
     leaveRoom,
+    destroyRoom,
     refresh,
   };
 

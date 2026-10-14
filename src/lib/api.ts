@@ -67,6 +67,9 @@ export const api = {
   leave: (code: string, input: { deviceId: string; token: string }) =>
     request<{ ok: boolean }>('POST', `${base(code)}/leave`, input),
 
+  destroyRoom: (code: string, input: { deviceId: string; token: string }) =>
+    request<{ ok: boolean; destroyed: boolean; serverTime: number }>('POST', `${base(code)}/destroy`, input),
+
   sync: (
     code: string,
     input: {

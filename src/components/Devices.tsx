@@ -4,7 +4,7 @@ import { useRoom } from '../state/room';
 import { forgetRoom } from '../lib/device';
 import { fmtCountdown, relativeTime } from '../lib/time';
 import { MODE_LABEL } from '../lib/types';
-import { Logout, Pencil, People, Share } from './icons';
+import { Logout, Pencil, People, Share, Trash } from './icons';
 import { ConfirmDialog, CopyChip, useToast } from './ui';
 
 
@@ -24,6 +24,7 @@ export function Devices() {
   const [renaming, setRenaming] = useState(false);
   const [draft, setDraft] = useState(room.me.name);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const shareUrl = `${window.location.origin}/r/${room.code}`;
   const online = room.members.filter((member) => room.onlineIds.has(member.deviceId));
@@ -124,6 +125,25 @@ export function Devices() {
             Leave room
           </button>
         </div>
+
+        <div
+          className="row between"
+          style={{
+            gap: 10,
+            marginTop: 16,
+            paddingTop: 14,
+            borderTop: '1px solid var(--hairline)',
+            flexWrap: 'wrap',
+          }}
+        >
+          <span className="tiny muted" style={{ flex: 1, minWidth: 180 }}>
+            Deleting the room removes it and its code for everyone — not just this device.
+          </span>
+          <button className="btn sm danger" onClick={() => setConfirmDelete(true)}>
+            <Trash size={14} />
+            Delete room
+          </button>
+        </div>
       </div>
 
       {confirmLeave ? (
@@ -136,6 +156,24 @@ export function Devices() {
             await room.leaveRoom();
             forgetRoom(room.code);
             toast('You left the room');
+            navigate('/');
+          }}
+        />
+      ) : null}
+
+      {confirmDelete ? (
+        <ConfirmDialog
+          title="Delete this room for everyone?"
+          body={`This permanently deletes “${room.meta.name}” (${room.code}) and its whole history — the timer, tasks, device list and every logged session. The code stops working immediately and every other device is disconnected. This cannot be undone.`}
+          confirmLabel="Delete room"
+          onClose={() => setConfirmDelete(false)}
+          onConfirm={async () => {
+            const ok = await room.destroyRoom();
+            if (!ok) {
+              toast('Could not delete the room. Check your connection and try again.');
+              return;
+            }
+            toast('Room deleted for everyone');
             navigate('/');
           }}
         />

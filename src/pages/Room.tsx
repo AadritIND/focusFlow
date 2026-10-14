@@ -94,7 +94,8 @@ function RoomShell() {
     return [mine, ...extra].filter((tz, index, all) => tz !== room.meta.tz && all.indexOf(tz) === index).slice(0, 3);
   }, [room.meta.tz, clockListVersion]);
 
-  if (room.error === 'room_not_found') {
+  if (room.error === 'room_not_found' || room.error === 'room_destroyed') {
+    const destroyed = room.error === 'room_destroyed';
     return (
       <div className="wrap">
         <header className="room-bar">
@@ -108,10 +109,20 @@ function RoomShell() {
         <div className="center-page">
           <div>
             <h1 className="serif" style={{ fontSize: 30, fontWeight: 500 }}>
-              That room does not exist
+              {destroyed ? 'This room was deleted' : 'That room does not exist'}
             </h1>
             <p className="lead" style={{ marginTop: 10 }}>
-              <span className="num">{room.code}</span> was never created, or it was typed with one letter off.
+              {destroyed ? (
+                <>
+                  <span className="num">{room.code}</span> was permanently removed, along with its history. Create a new
+                  room to keep going.
+                </>
+              ) : (
+                <>
+                  <span className="num">{room.code}</span> was never created, it was deleted, or it was typed with one
+                  letter off.
+                </>
+              )}
             </p>
             <div className="row" style={{ gap: 10, marginTop: 18, justifyContent: 'center' }}>
               <Link className="btn primary lg" to="/">

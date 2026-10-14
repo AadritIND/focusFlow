@@ -118,6 +118,8 @@ async function route(request: Request, env: Env, url: URL): Promise<Response | n
         return handleSessionDelete(env, request, code);
       case 'leave':
         return handleLeave(env, request, code);
+      case 'destroy':
+        return handleDestroy(env, request, code);
       default:
         return fail(404, 'not_found');
     }
@@ -284,6 +286,33 @@ async function handleLeave(env: Env, request: Request, code: string): Promise<Re
   if (!member) return json({ ok: true });
   await env.DB.prepare('DELETE FROM members WHERE code = ? AND device_id = ?').bind(code, member.device_id).run();
   return json({ ok: true, serverTime: Date.now() });
+}
+
+/**
+ * Burn a room. This is the destructive counterpart to /leave: it deletes the
+ * room row, its shared state, its member list and its whole session log, so the
+ * code stops working everywhere. Any member may do it (rooms have no owner), and
+ * every other device finds out on its next sync — the member row is gone, so the
+ * API answers 403, the client re-joins, the room lookup answers 404, and the
+ * device drops back to the "does not exist" screen by itself.
+ */
+async function handleDestroy(env: Env, request: Request, code: string): Promise<Response> {
+  const body = (await readJson(request)) ?? {};
+  const member = await findMember(env, code, str(body.deviceId, 64), str(body.token, 64));
+  if (!member) return fail(403, 'not_a_member');
+
+  const now = Date.now();
+  // Explicit deletes for every table: the worker never enables PRAGMA
+  // foreign_keys, so ON DELETE CASCADE is not guaranteed to fire.
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM session_tombstones WHERE code = ?').bind(code),
+    env.DB.prepare('DELETE FROM sessions WHERE code = ?').bind(code),
+    env.DB.prepare('DELETE FROM members WHERE code = ?').bind(code),
+    env.DB.prepare('DELETE FROM room_state WHERE code = ?').bind(code),
+    env.DB.prepare('DELETE FROM rooms WHERE code = ?').bind(code),
+  ]);
+  statsCache = { at: 0, data: null };
+  return json({ ok: true, destroyed: true, serverTime: now });
 }
 
 /* ------------------------------------------------------------------ */

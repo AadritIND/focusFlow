@@ -267,6 +267,46 @@ const yesterday = dayKey(new Date(Date.now() - 86400000));
   check('session batches are capped', huge.data?.inserted <= 300, huge.data?.inserted);
 }
 
+/* 11. burning a room ---------------------------------------------- */
+{
+  const owner = { id: 'devDel-' + Math.random().toString(36).slice(2, 10), name: 'Owner' };
+  const other = { id: 'devDel2-' + Math.random().toString(36).slice(2, 10), name: 'Other' };
+  const created = await api('POST', '/api/rooms', { deviceId: owner.id, deviceName: owner.name, roomName: 'Doomed room' });
+  const dcode = created.data?.room?.code ?? '';
+  const dtoken = created.data?.token ?? '';
+  check('destroy: room created', created.status === 201 && !!dcode, created.status);
+
+  const join = await api('POST', `/api/rooms/${dcode}/join`, { deviceId: other.id, deviceName: other.name });
+  const otoken = join.data?.token ?? '';
+  await api('POST', `/api/rooms/${dcode}/sessions`, {
+    deviceId: owner.id,
+    token: dtoken,
+    sessions: [{ id: `s:${dcode}:1`, day: today, kind: 'focus', startedAt: Date.now() - 60000, endedAt: Date.now(), minutes: 1 }],
+  });
+
+  const badToken = await api('POST', `/api/rooms/${dcode}/destroy`, { deviceId: owner.id, token: 'nope' });
+  check('destroy: rejects a bad token', badToken.status === 403 && badToken.data?.error === 'not_a_member', badToken);
+
+  const burned = await api('POST', `/api/rooms/${dcode}/destroy`, { deviceId: owner.id, token: dtoken });
+  check(
+    'destroy: a member can burn the room',
+    burned.status === 200 && burned.data?.ok === true && burned.data?.destroyed === true,
+    burned.data,
+  );
+
+  const gone = await api('GET', `/api/rooms/${dcode}`);
+  check('destroy: the room row is gone', gone.status === 404, gone.status);
+
+  const otherSync = await api('POST', `/api/rooms/${dcode}/sync`, { deviceId: other.id, token: otoken });
+  check('destroy: other devices are disconnected', otherSync.status === 403, otherSync.status);
+
+  const rejoin = await api('POST', `/api/rooms/${dcode}/join`, { deviceId: other.id, deviceName: other.name });
+  check('destroy: the code cannot be reused', rejoin.status === 404, rejoin.status);
+
+  const fresh = await api('POST', '/api/rooms', { deviceId: owner.id, deviceName: owner.name });
+  check('destroy: new rooms still mint fresh codes', fresh.status === 201 && fresh.data?.room?.code !== dcode);
+}
+
 console.log(`\n${pass} checks passed, ${failures.length} failed`);
 if (failures.length) {
   console.log('failed checks:\n' + failures.map((f) => ' - ' + f).join('\n'));
