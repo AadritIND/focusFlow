@@ -43,22 +43,29 @@ another device to sync it. Nothing to configure — no accounts, no keys.
 ```bash
 npm run check       # typecheck the app and the Worker
 npm run build       # dist/client + dist/worker/index.js
-npm run test:api    # 42-check end-to-end API suite (needs dev:api running)
+npm run test:api    # 49-check end-to-end API suite (needs dev:api running)
 ```
 
 ## Architecture
 
+The API is a single request handler ([worker/index.ts](worker/index.ts)) that speaks to a
+D1-shaped SQL database through a thin adapter, so the same router runs on two hosts: a Cloudflare
+Worker over D1, or a Vercel Edge Function over Turso. The React client talks to `/api/*` either way.
+
 ```
 browser (React + Vite, static assets)
-  └── /api/*  ─────────────►  Cloudflare Worker (worker/index.ts)
-                                 └── D1 (SQLite): rooms · room_state · members · sessions · tombstones
+  └── /api/*  ──┬──►  Cloudflare Worker (worker/index.ts)  └── D1 (SQLite)
+                └──►  Vercel Edge Function (api/index.ts)  └── Turso (libSQL)
+                       rooms · room_state · members · sessions · tombstones
 ```
 
 | Path | What it is |
 | --- | --- |
 | [worker/index.ts](worker/index.ts) | API: rooms, join/leave, sync, shared doc, session log, public counters |
 | [worker/lib.ts](worker/lib.ts) | Types, validation, room-code generation, row coercion |
-| [worker/schema.ts](worker/schema.ts) | Idempotent DDL the Worker applies itself on first use |
+| [worker/libsql.ts](worker/libsql.ts) | D1-compatible adapter over a libSQL/Turso client |
+| [api/index.ts](api/index.ts) | Vercel entrypoint: same handler, edge runtime |
+| [worker/schema.ts](worker/schema.ts) | Idempotent DDL the handler applies itself on first use |
 | [worker/schema.sql](worker/schema.sql) | The same schema for CLI inspection / manual migration |
 | [src/state/room.tsx](src/state/room.tsx) | The sync engine: polling, optimistic writes, session logging, presence |
 | [src/lib/stats.ts](src/lib/stats.ts) | Every number in the UI, derived from the session log |
@@ -108,7 +115,10 @@ timezone validation, presence freshness, batch caps and the public counters.
 
 ## Deploying
 
-The build output is a static client plus a bundled Worker, described by [sites.json](sites.json):
+`npm run build` produces a static client (`dist/client`) and a bundled API (`dist/worker/index.js`).
+The same handler can be hosted two ways.
+
+**Cloudflare Workers + D1.** The build output is described by [sites.json](sites.json):
 
 ```json
 { "entrypoint": "index.js", "modules": [{ "name": "index.js", "path": "./dist/worker/index.js" }],
@@ -120,6 +130,22 @@ The build output is a static client plus a bundled Worker, described by [sites.j
 3. Deploy the manifest. The Worker creates the schema on the first API request.
 
 No secrets or environment variables are required.
+
+**Vercel + Turso.** The live deployment at <https://focussf.vercel.app> runs this way.
+[vercel.json](vercel.json) builds the client, serves it from `dist/client`, and routes every
+`/api/*` request to a single Edge Function ([api/index.ts](api/index.ts)) plus an SPA fallback.
+
+1. Create a Turso database and a token.
+2. Set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in the project's environment variables.
+3. Deploy with the Vercel CLI or the GitHub integration. The schema is created on the first API request.
+
+To exercise the real API against the same libSQL backend locally (file-backed by default, or set the
+two `TURSO_*` variables to hit the cloud database):
+
+```bash
+npm run api:local   # http://127.0.0.1:8790, fresh DB at .dev/focusflow.db
+npm run test:api http://127.0.0.1:8790
+```
 
 ## Using it
 
