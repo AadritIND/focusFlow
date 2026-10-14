@@ -59,16 +59,16 @@ export function HistoryPanel({ open, onClose }: { open: boolean; onClose: () => 
           sessions.map((session) => (
             <div className="log-row" key={session.id}>
               <span className={`kind ${session.kind}`} />
-              <span className="num" style={{ width: 46 }}>
+              <span className="when num">
                 {fmtTime(session.endedAt, tz, room.prefs.hour24, false)}
               </span>
-              <span className="num" style={{ width: 48 }}>
+              <span className="dur num">
                 {fmtDuration(session.minutes)}
               </span>
-              <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span className="task">
                 {session.taskLabel ?? <span className="muted">{MODE_LABEL[session.kind]}</span>}
               </span>
-              <span className="tiny muted">{session.memberName ?? ''}</span>
+              <span className="who tiny muted">{session.memberName ?? ''}</span>
               <button
                 className="icon-btn"
                 aria-label="Delete session"
@@ -388,19 +388,19 @@ export function HistoryPanel({ open, onClose }: { open: boolean; onClose: () => 
               logDesc.slice(0, 300).map((session) => (
                 <div className="log-row" key={session.id}>
                   <span className={`kind ${session.kind}`} />
-                  <span style={{ width: 92, fontSize: 12 }} className="muted">
+                  <span className="when wide muted">
                     {dayLabel(session.day, tz)} {fmtTime(session.endedAt, tz, room.prefs.hour24, false)}
                   </span>
-                  <span className="num" style={{ width: 48 }}>
+                  <span className="dur num">
                     {fmtDuration(session.minutes)}
                   </span>
-                  <span style={{ width: 92, fontSize: 12 }} className="muted">
+                  <span className="mode muted">
                     {MODE_LABEL[session.kind]}
                   </span>
-                  <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span className="task">
                     {session.taskLabel ?? <span className="muted">—</span>}
                   </span>
-                  <span className="tiny muted" style={{ width: 110, textAlign: 'right' }}>
+                  <span className="who tiny muted">
                     {session.memberName ?? 'this device'} · {relativeTime(session.endedAt, room.now)}
                   </span>
                   <button

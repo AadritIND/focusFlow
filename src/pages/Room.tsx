@@ -146,9 +146,9 @@ function RoomShell() {
             <span className="mark" style={{ color: 'var(--mode, var(--accent))' }}>
               <Mark size={26} />
             </span>
-            <span style={{ display: 'inline-flex', flexDirection: 'column', lineHeight: 1.15 }}>
-              <span>{room.meta.name}</span>
-              <span className="tiny muted num">{room.code}</span>
+            <span className="brand-text" style={{ display: 'inline-flex', flexDirection: 'column', lineHeight: 1.15, minWidth: 0 }}>
+              <span className="brand-name">{room.meta.name}</span>
+              <span className="brand-code tiny muted num">{room.code}</span>
             </span>
           </Link>
           <span className="spacer" />

@@ -665,16 +665,31 @@ input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
+  /* A 24px box (matching the thumb) with the visual track drawn as an 8px
+     pseudo-element, so the slider is easy to grab on touch without changing
+     how it looks. */
+  height: 24px;
+  background: transparent;
+  border: none;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
   height: 8px;
   border-radius: 8px;
   background: rgba(120, 120, 128, 0.3);
-  border: none;
+}
+
+input[type='range']::-moz-range-track {
+  height: 8px;
+  border-radius: 8px;
+  background: rgba(120, 120, 128, 0.3);
 }
 
 input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 24px;
   height: 24px;
+  margin-top: -8px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
@@ -805,6 +820,11 @@ input[type='range']::-moz-range-thumb {
   gap: 10px;
   margin-top: 20px;
   width: 100%;
+}
+
+.timer-meta .row.between {
+  flex-wrap: wrap;
+  row-gap: 6px;
 }
 
 .intention {
@@ -1251,6 +1271,41 @@ html[data-theme='dark'] .bar-track {
   background: #2b6e9e;
 }
 
+/* Session-log columns. Widths live here (not inline) so a phone breakpoint can
+   simply reflow them instead of fighting attribute selectors. */
+.log-row .when {
+  width: 46px;
+  font-variant-numeric: tabular-nums;
+}
+
+.log-row .when.wide {
+  width: 92px;
+  font-size: 12px;
+}
+
+.log-row .dur {
+  width: 48px;
+  font-variant-numeric: tabular-nums;
+}
+
+.log-row .mode {
+  width: 92px;
+  font-size: 12px;
+}
+
+.log-row .task {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.log-row .who {
+  width: 110px;
+  text-align: right;
+}
+
 .empty-state {
   padding: 28px 12px;
   text-align: center;
@@ -1302,6 +1357,10 @@ html[data-theme='dark'] .bar-track {
   inset: 0;
   z-index: 50;
   display: grid;
+  /* minmax(0, 1fr) lets the column shrink to the viewport instead of growing
+     to the dialog's min-content, which is what pushed the modal off-screen on
+     phones. */
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   padding: 18px;
   background: rgba(0, 0, 0, 0.25);
@@ -1318,6 +1377,7 @@ html[data-theme='dark'] .bar-track {
 
 .modal {
   width: min(560px, 100%);
+  min-width: 0;
   max-height: min(88vh, 900px);
   display: flex;
   flex-direction: column;
@@ -1346,6 +1406,10 @@ html[data-theme='dark'] .bar-track {
   justify-content: space-between;
   gap: 14px;
   padding: 22px 24px 14px;
+  /* The modal is a capped-height column flexbox. Head/tabs/foot must keep
+     their natural height and let .modal-body be the only region that shrinks
+     and scrolls, otherwise long content squashes the title and tab row. */
+  flex: none;
 }
 
 .modal-head h2 {
@@ -1357,6 +1421,8 @@ html[data-theme='dark'] .bar-track {
 .modal-body {
   padding: 16px 24px 22px;
   overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .modal-foot {
@@ -1367,6 +1433,7 @@ html[data-theme='dark'] .bar-track {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  flex: none;
 }
 
 .tabs {
@@ -1374,6 +1441,7 @@ html[data-theme='dark'] .bar-track {
   gap: 4px;
   padding: 4px 24px 14px;
   flex-wrap: wrap;
+  flex: none;
 }
 
 .tabs button {
@@ -1729,6 +1797,18 @@ html[data-theme='dark'] .stat-strip .item {
   border-radius: 28px;
 }
 
+/* The demo's top row (room code + avatars) must be allowed to wrap, or its
+   nowrap min-content stretches the hero grid past the viewport on small
+   phones. */
+.demo-shell .row.between {
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.hero > * {
+  min-width: 0;
+}
+
 .demo-shell .ring {
   width: min(280px, 62vw);
   margin: 14px 0 4px;
@@ -1814,6 +1894,37 @@ html[data-theme='dark'] .stat-strip .item {
   }
 }
 
+@media (max-width: 850px) {
+  /* A flex row that wraps by intent: brand + theme on the first line, the two
+     actions on the next, and the in-page nav on its own scrollable line.
+     Flex keeps every button at its content width instead of stretching it
+     across a grid track. */
+  .site-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    min-height: 0;
+    padding-block: 10px;
+  }
+  .site-nav > .spacer { display: none; }
+  .site-nav > .brand { order: 1; flex: 1 1 auto; min-width: 0; }
+  .site-nav > .icon-btn { order: 2; flex: none; }
+  .site-nav > .btn { order: 3; flex: 0 0 auto; }
+  .site-nav > .btn.primary { order: 4; }
+  .site-nav nav {
+    order: 5;
+    flex: 1 1 100%;
+    gap: 18px;
+    overflow-x: auto;
+    padding: 3px 0 1px;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .site-nav nav a { padding-block: 7px; }
+  .site-nav nav::-webkit-scrollbar { display: none; }
+}
+
 @media (max-width: 720px) {
   .wrap {
     padding: 0 16px;
@@ -1826,38 +1937,29 @@ html[data-theme='dark'] .stat-strip .item {
   .settings-grid {
     grid-template-columns: 1fr;
   }
-  .site-nav {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto auto;
-    gap: 8px;
-    padding-block: 8px;
-  }
-  .site-nav > .brand { grid-column: 1 / 3; grid-row: 1; }
-  .site-nav > .spacer { display: none; }
-  .site-nav > .icon-btn { grid-column: 4; grid-row: 1; }
-  .site-nav > .btn { min-width: 0; padding: 8px 10px; font-size: 12px; }
-  .site-nav > .btn:not(.primary) { grid-column: 1 / 3; grid-row: 2; }
-  .site-nav > .btn.primary { grid-column: 3 / 5; grid-row: 2; }
-  .site-nav nav {
-    grid-column: 1 / -1;
-    grid-row: 3;
-    gap: 18px;
-    overflow-x: auto;
-    padding: 4px 0 2px;
-    scrollbar-width: none;
-    white-space: nowrap;
-  }
-  .site-nav nav::-webkit-scrollbar { display: none; }
+  /* Brand (name + code) on the left, the room clock and the three icon
+     buttons on the right — five items in five columns, so nothing wraps onto
+     a second row. */
   .room-bar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) repeat(3, 40px);
+    grid-template-columns: minmax(0, 1fr) auto repeat(3, auto);
+    align-items: center;
     gap: 6px;
-  }
-  .room-bar .bigclock {
-    display: none;
+    min-height: 0;
+    padding-block: 8px;
   }
   .room-bar > .spacer,
   .room-bar > .chip { display: none; }
+  .room-bar .brand { min-width: 0; }
+  .room-bar .brand-text { min-width: 0; }
+  .room-bar .brand-name,
+  .room-bar .brand-code {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .room-bar .bigclock .tiny { display: none; }
+  .room-bar button.row > .chip { display: none; }
   .room-bar .icon-btn { width: 40px; height: 40px; }
   .timer-shell {
     padding: 22px 18px 20px;
@@ -1907,6 +2009,8 @@ html[data-theme='dark'] .stat-strip .item {
   .kv { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .kv .cell { padding: 13px 14px; }
   .kv .cell .v { font-size: clamp(23px, 7vw, 30px); }
+  .panel-head .label { min-width: 0; overflow-wrap: anywhere; }
+  .panel-body > .row.between { flex-wrap: wrap; row-gap: 8px; }
   .bars { gap: 5px; }
   .bars .cap, .bars .day { font-size: 9px; }
   .room-grid { padding-top: 14px; gap: 14px; }
@@ -1920,20 +2024,40 @@ html[data-theme='dark'] .stat-strip .item {
   .tabs button { flex: none; white-space: nowrap; }
   .modal-foot { align-items: stretch; padding-inline: 18px; }
   .modal-foot > .row { flex-wrap: wrap; }
-  .setting { align-items: flex-start; }
-  .setting > span:first-child { min-width: 0; }
+  .setting { align-items: flex-start; flex-wrap: wrap; row-gap: 6px; }
+  .setting > span:first-child { min-width: 0; flex: 1 1 auto; }
+  .setting > .row { min-width: 0 !important; flex: 0 1 auto; }
+  .setting > .row input[type='range'] { min-width: 0; width: 100%; }
+  .setting > .segmented { width: 100%; }
+  .setting > input.field { width: min(42vw, 170px) !important; }
+  /* Session log rows keep their fixed columns but shrink to fit the dialog. */
+  .log-row { gap: 6px; font-size: 12px; }
+  .log-row .when { width: auto; min-width: 44px; }
+  .log-row .when.wide {
+    width: auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .log-row .dur { width: auto; }
+  .log-row .mode { display: none; }
+  .log-row .who { width: auto; max-width: 84px; }
 }
 
 @media (max-width: 380px) {
   .wrap { padding-inline: 12px; }
-  .site-nav { gap: 6px; grid-template-columns: minmax(0, 1fr) auto auto auto; }
+  /* .site-nav and .room-bar are flex/grid defined above; only tighten spacing
+     and shrink the controls here so nothing is overridden back to a stale
+     track layout. */
+  .site-nav { gap: 6px 8px; }
   .site-nav > .btn { padding-inline: 7px; font-size: 11px; }
   .hero h1 { font-size: clamp(34px, 10vw, 42px); }
   .hero-actions > .btn { flex: 1 1 100%; }
   .timer-controls { gap: 6px; }
   .timer-controls .btn { padding-inline: 10px; }
   .timer-controls .btn.primary { min-width: 112px; padding-inline: 12px; }
-  .room-bar { grid-template-columns: minmax(0, 1fr) repeat(3, 36px); gap: 4px; }
+  .room-bar { gap: 4px; }
   .room-bar .icon-btn { width: 36px; height: 36px; }
   .kv { grid-template-columns: minmax(0, 1fr); }
   .stat-strip .item { padding: 12px; }
@@ -1967,5 +2091,17 @@ html[data-motion='reduce'] * {
   .icon-btn {
     width: 44px;
     height: 44px;
+  }
+  /* Coarse pointers only: give links and small pressable rows a comfortable
+     hit area without changing the desktop look. */
+  .site-footer a,
+  .site-nav nav a {
+    padding-block: 8px;
+  }
+  .tabs button {
+    min-height: 40px;
+  }
+  .segmented button {
+    min-height: 38px;
   }
 }
