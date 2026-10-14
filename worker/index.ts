@@ -26,8 +26,8 @@ import {
   str,
   type Env,
   type MemberRow,
-} from './lib';
-import { SCHEMA_STATEMENTS } from './schema';
+} from './lib.js';
+import { SCHEMA_STATEMENTS } from './schema.js';
 
 export type { Env };
 
@@ -52,20 +52,28 @@ function ensureSchema(env: Env): Promise<void> {
   return schemaReady;
 }
 
+/**
+ * The entire `/api` surface: schema bootstrap + router, wrapped in error
+ * handling. Shared by the Cloudflare Worker below and the Vercel function in
+ * `api/` so both hosts run identical logic.
+ */
+export async function handleApi(request: Request, env: Env): Promise<Response> {
+  try {
+    await ensureSchema(env);
+    const url = new URL(request.url);
+    const res = await route(request, env, url);
+    return res ?? fail(404, 'not_found');
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : 'unknown error';
+    return fail(500, 'server_error', detail);
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname.startsWith('/api/')) {
-      try {
-        await ensureSchema(env);
-        const res = await route(request, env, url);
-        return res ?? fail(404, 'not_found');
-      } catch (error) {
-        const detail = error instanceof Error ? error.message : 'unknown error';
-        return fail(500, 'server_error', detail);
-      }
-    }
+    if (url.pathname.startsWith('/api/')) return handleApi(request, env);
 
     // Everything else is the static client.
     if (env.ASSETS) return env.ASSETS.fetch(request);

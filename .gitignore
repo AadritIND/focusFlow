@@ -4,12 +4,15 @@ node_modules/
 # build output
 dist/
 
-# local dev state (wrangler/miniflare D1, server logs)
+# local dev state (wrangler/miniflare D1, local libSQL, server logs)
 .wrangler/
 .dev/
 
 # tooling metadata
 .freebuff/
+.vercel/
+.agents/
+skills-lock.json
 
 # logs
 *.log

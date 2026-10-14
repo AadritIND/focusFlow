@@ -14,11 +14,13 @@
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.worker.json --noEmit",
     "db:init": "wrangler d1 execute focusflow --local --file=worker/schema.sql",
     "db:init:remote": "wrangler d1 execute focusflow --remote --file=worker/schema.sql",
-    "test:api": "node scripts/test-api.mjs"
+    "test:api": "node scripts/test-api.mjs",
+    "api:local": "node scripts/serve-libsql.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@libsql/client": "^0.18.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.0"
