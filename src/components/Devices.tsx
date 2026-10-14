@@ -5,7 +5,7 @@ import { forgetRoom } from '../lib/device';
 import { fmtCountdown, relativeTime } from '../lib/time';
 import { MODE_LABEL } from '../lib/types';
 import { Logout, Pencil, People, Share, Trash } from './icons';
-import { ConfirmDialog, CopyChip, useToast } from './ui';
+import { ConfirmDialog, useToast } from './ui';
 
 
 const initials = (name: string) =>
@@ -26,7 +26,6 @@ export function Devices() {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const shareUrl = `${window.location.origin}/r/${room.code}`;
   const online = room.members.filter((member) => room.onlineIds.has(member.deviceId));
 
   return (
@@ -41,20 +40,6 @@ export function Devices() {
         </span>
       </div>
       <div className="panel-body" style={{ paddingTop: 12 }}>
-        <div className="row" style={{ gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
-          <CopyChip value={room.code} label={room.code} onCopied={(ok) => toast(ok ? 'Room code copied' : 'Copy failed')} />
-          <CopyChip
-            value={shareUrl}
-            label="Copy invite link"
-            mono={false}
-            onCopied={(ok) => toast(ok ? 'Invite link copied — open it on your other device' : 'Copy failed')}
-          />
-        </div>
-        <p className="tiny muted" style={{ margin: '8px 0 12px' }}>
-          Anyone with the code joins instantly — no account, no approval. This browser stays signed into the room
-          forever, so opening it again lands you straight back here.
-        </p>
-
         {room.members.map((member) => {
           const isMe = member.deviceId === room.me.deviceId;
           const isOnline = room.onlineIds.has(member.deviceId);

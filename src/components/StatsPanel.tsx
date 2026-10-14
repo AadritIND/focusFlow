@@ -61,8 +61,12 @@ export function StatsPanel({ onOpenHistory }: { onOpenHistory: () => void }) {
           </div>
           <div className="cell room-code-cell">
             <div className="k">Room code</div>
-            <div className="v num room-code-value">
-              {room.code}
+            <div className="v room-code-value" role="group" aria-label={`Room code ${room.code}`}>
+              {room.code.split('-').map((part, index, parts) => (
+                <span className="room-code-segment" key={`${part}-${index}`}>
+                  {part}{index < parts.length - 1 ? '-' : ''}
+                </span>
+              ))}
             </div>
             <div className="s room-code-meta">
               <span>
