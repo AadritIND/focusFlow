@@ -240,33 +240,6 @@ function RoomShell() {
           </section>
 
           <Devices />
-
-          <section className="panel" aria-label="Shortcuts">
-            <div className="panel-body">
-              <p className="label" style={{ marginBottom: 8 }}>
-                Shortcuts
-              </p>
-              <div className="row wrap" style={{ gap: 8 }}>
-                {(
-                  [
-                    ['Space', 'start / pause'],
-                    ['R', 'reset'],
-                    ['N', 'next'],
-                    ['1 2 3', 'sessions'],
-                    ['H', 'history'],
-                    ['C', 'clocks'],
-                  ] as [string, string][]
-                ).map(([key, action]) => (
-                  <span className="chip" key={key}>
-                    <span className="num" style={{ fontWeight: 600 }}>
-                      {key}
-                    </span>
-                    <span className="muted">{action}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </section>
         </div>
       </main>
 

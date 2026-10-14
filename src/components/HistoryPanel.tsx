@@ -146,6 +146,16 @@ export function HistoryPanel({ open, onClose }: { open: boolean; onClose: () => 
       >
         {tab === 'overview' ? (
           <div>
+            <div className="tile" style={{ marginBottom: 14 }}>
+              <div className="tiny muted">Current streak</div>
+              <div className="num" style={{ fontSize: 26 }}>
+                {stats.streak.current} {stats.streak.current === 1 ? 'day' : 'days'}
+              </div>
+              <div className="tiny muted">
+                {stats.streak.activeToday ? 'Kept alive today' : 'One session keeps it alive'} · best {stats.streak.best}
+              </div>
+            </div>
+
             <div className="kv">
               <div className="cell">
                 <div className="k">Today</div>
@@ -220,15 +230,6 @@ export function HistoryPanel({ open, onClose }: { open: boolean; onClose: () => 
               Insights
             </p>
             <div className="settings-grid">
-              <div className="tile">
-                <div className="tiny muted">Current streak</div>
-                <div className="num" style={{ fontSize: 20 }}>
-                  {stats.streak.current} {stats.streak.current === 1 ? 'day' : 'days'}
-                </div>
-                <div className="tiny muted">
-                  {stats.streak.activeToday ? 'Kept alive today' : 'One session keeps it alive'} · best {stats.streak.best}
-                </div>
-              </div>
               <div className="tile">
                 <div className="tiny muted">Best day</div>
                 <div className="num" style={{ fontSize: 20 }}>

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useRoom } from '../state/room';
 import { deriveStats, dayTitle } from '../lib/stats';
-import { fmtDayKey, fmtDuration } from '../lib/time';
+import { dayKey, fmtDayKey, fmtDuration } from '../lib/time';
 import { Calendar, History } from './icons';
 
 export function StatsPanel({ onOpenHistory }: { onOpenHistory: () => void }) {
@@ -16,6 +16,8 @@ export function StatsPanel({ onOpenHistory }: { onOpenHistory: () => void }) {
     : null;
 
   const maxWeek = Math.max(...stats.week.map((d) => d.focusMinutes), 1);
+
+  const since = room.meta.createdAt ? fmtDayKey(dayKey(room.meta.createdAt, room.meta.tz)) : null;
 
   return (
     <section className="panel" aria-label="Today at a glance">
@@ -58,18 +60,13 @@ export function StatsPanel({ onOpenHistory }: { onOpenHistory: () => void }) {
             </div>
           </div>
           <div className="cell">
-            <div className="k">Streak</div>
-            <div className="v">
-              {stats.streak.current}
-              <span className="muted" style={{ fontSize: 14 }}>
-                {' '}
-                days
-              </span>
+            <div className="k">Room code</div>
+            <div className="v num" style={{ letterSpacing: '0.12em' }}>
+              {room.code}
             </div>
             <div className="s">
-              {stats.streak.activeToday ? 'Still alive today' : 'Do one session to keep it'}
-              {' · best '}
-              {stats.streak.best}
+              {room.onlineIds.size} online · {room.members.length} {room.members.length === 1 ? 'device' : 'devices'}
+              {since ? ` · since ${since}` : ''}
             </div>
           </div>
         </div>
