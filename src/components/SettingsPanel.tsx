@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRoom } from '../state/room';
-import { CITIES, browserTz, fmtTime, isValidTz, offsetLabel, searchCities, todayKey } from '../lib/time';
+import { CITIES, offsetLabel, todayKey } from '../lib/time';
 import type { Ambient, Chime } from '../lib/types';
 import { ConfirmDialog, Field, Modal, NumberRow, RangeRow, Segmented, SwitchRow, useToast } from './ui';
 
@@ -22,7 +22,6 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
   const room = useRoom();
   const toast = useToast();
   const [name, setName] = useState(room.meta.name);
-  const [tzQuery, setTzQuery] = useState('');
   const [confirm, setConfirm] = useState<'today' | 'all' | null>(null);
 
   useEffect(() => {
@@ -30,8 +29,6 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
   }, [open, room.meta.name]);
 
   if (!open) return null;
-
-  const zones = searchCities(tzQuery).slice(0, 12);
 
   return (
     <>
@@ -83,68 +80,6 @@ export function SettingsPanel({ open, onClose }: { open: boolean; onClose: () =>
             <input className="field num" value={room.code} readOnly onFocus={(event) => event.target.select()} />
           </Field>
         </div>
-
-        <div className="setting">
-          <span>
-            <span className="name">Timezone for days and history</span>
-            <span className="desc" style={{ display: 'block' }}>
-              Right now it is {fmtTime(room.now, room.meta.tz, room.prefs.hour24)} there. Days roll over on this clock.
-            </span>
-          </span>
-        </div>
-        <div className="row" style={{ gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-          <button
-            className="btn sm"
-            onClick={() => {
-              void room.setRoomTz(browserTz());
-              toast(`Room follows your timezone: ${browserTz()}`);
-            }}
-          >
-            Use my timezone ({browserTz()})
-          </button>
-          <span className="small muted">
-            Current: <span className="num">{room.meta.tz}</span>
-          </span>
-        </div>
-        <input
-          className="field"
-          placeholder="Search a city to switch the room's clock…"
-          value={tzQuery}
-          onChange={(event) => setTzQuery(event.target.value)}
-        />
-        {tzQuery ? (
-          <div style={{ marginTop: 8, maxHeight: 190, overflowY: 'auto' }}>
-            {zones.map((city) => (
-              <button
-                key={city.tz}
-                className="row between"
-                style={{ width: '100%', padding: '7px 4px', borderBottom: '1px solid var(--hairline)' }}
-                onClick={() => {
-                  void room.setRoomTz(city.tz);
-                  setTzQuery('');
-                  toast(`Room clock set to ${city.city}`);
-                }}
-              >
-                <span style={{ fontSize: 14 }}>
-                  {city.city} <span className="tiny muted">{city.country}</span>
-                </span>
-                <span className="tiny muted num">{fmtTime(room.now, city.tz, room.prefs.hour24, false)}</span>
-              </button>
-            ))}
-            {zones.length === 0 && isValidTz(tzQuery) ? (
-              <button
-                className="btn sm"
-                onClick={() => {
-                  void room.setRoomTz(tzQuery);
-                  setTzQuery('');
-                }}
-              >
-                Use zone {tzQuery}
-              </button>
-            ) : null}
-            {zones.length === 0 && !isValidTz(tzQuery) ? <p className="tiny muted">No match. Try a city name.</p> : null}
-          </div>
-        ) : null}
 
         <p className="label" style={{ margin: '24px 0 6px' }}>
           Session rhythm <span className="muted">· shared</span>

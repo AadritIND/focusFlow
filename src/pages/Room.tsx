@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { RoomProvider, useRoom } from '../state/room';
 import { Timer } from '../components/Timer';
@@ -13,7 +13,7 @@ import { Gear, History, Mark, Moon, Sun } from '../components/icons';
 import { useHotkeys, useWakeLock } from '../lib/hooks';
 import { playAmbient, stopAmbient, unlockAudio } from '../lib/audio';
 import { useAppliedTheme, useModeBackground } from '../lib/theme';
-import { browserTz, cityForTz, fmtCountdown, fmtTime, relativeTime } from '../lib/time';
+import { fmtCountdown, relativeTime } from '../lib/time';
 
 export function RoomPage() {
   return (
@@ -28,11 +28,7 @@ function RoomShell() {
   const [history, setHistory] = useState(false);
   const [settings, setSettings] = useState(false);
   const [clocks, setClocks] = useState(false);
-  const [clockListVersion, setClockListVersion] = useState(0);
-  const closeClocks = () => {
-    setClocks(false);
-    setClockListVersion((version) => version + 1);
-  };
+  const closeClocks = () => setClocks(false);
 
   useAppliedTheme(room.prefs.theme, room.prefs.reduceMotion);
   useModeBackground(room.doc.mode === 'focus' ? 'work' : room.doc.mode);
@@ -80,19 +76,6 @@ function RoomShell() {
       document.title = 'FocusFlow';
     };
   }, [room.doc.running, room.doc.mode, room.remaining, room.meta.name]);
-
-  const pinnedZones = useMemo(() => {
-    const raw = typeof localStorage === 'undefined' ? '[]' : localStorage.getItem('focusflow:clocks:v2') ?? '[]';
-    let extra: string[] = [];
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) extra = parsed.filter((z) => typeof z === 'string').slice(0, 3);
-    } catch {
-      extra = [];
-    }
-    const mine = browserTz();
-    return [mine, ...extra].filter((tz, index, all) => tz !== room.meta.tz && all.indexOf(tz) === index).slice(0, 3);
-  }, [room.meta.tz, clockListVersion]);
 
   if (room.error === 'room_not_found' || room.error === 'room_destroyed') {
     const destroyed = room.error === 'room_destroyed';
@@ -195,49 +178,6 @@ function RoomShell() {
 
         <div className="column">
           <StatsPanel onOpenHistory={() => setHistory(true)} />
-
-          <section className="panel" aria-label="Clocks">
-            <div className="panel-head">
-              <span className="label">Clocks</span>
-              <button className="btn sm quiet" onClick={() => setClocks(true)}>
-                Add city
-              </button>
-            </div>
-            <div className="panel-body" style={{ paddingTop: 8 }}>
-              <div className="clock-row">
-                <span className="dot live" />
-                <span style={{ flex: 1 }}>
-                  <span className="row" style={{ gap: 8 }}>
-                    <strong style={{ fontWeight: 550, fontSize: 14 }}>
-                      {cityForTz(room.meta.tz)?.city ?? room.meta.tz}
-                    </strong>
-                    <span className="chip">Room</span>
-                  </span>
-                  <span className="tiny muted">{room.meta.tz}</span>
-                </span>
-                <span className="num" style={{ fontSize: 17 }}>
-                  {fmtTime(room.now, room.meta.tz, room.prefs.hour24, room.prefs.headerSeconds)}
-                </span>
-              </div>
-              {pinnedZones.map((tz) => (
-                <div className="clock-row" key={tz}>
-                  <span className="dot" />
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <strong style={{ fontWeight: 550, fontSize: 14 }}>{cityForTz(tz)?.city ?? tz}</strong>
-                    <span className="tiny muted" style={{ display: 'block' }}>
-                      {tz}
-                    </span>
-                  </span>
-                  <span className="num" style={{ fontSize: 17 }}>
-                    {fmtTime(room.now, tz, room.prefs.hour24, false)}
-                  </span>
-                </div>
-              ))}
-              <p className="tiny muted" style={{ marginTop: 10 }}>
-                Days in this room roll over at midnight in {room.meta.tz}.
-              </p>
-            </div>
-          </section>
 
           <Devices />
         </div>
